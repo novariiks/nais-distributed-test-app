@@ -6,7 +6,6 @@ metadata:
   labels:
     team: flais
 spec:
-  image: "{{image}}"
   port: 8080
   ingresses:
     - nais-chat.test.novari.cloud.nais.io

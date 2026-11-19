@@ -6,7 +6,6 @@ metadata:
   labels:
     team: flais
 spec:
-  image: "{{image}}"
   port: 8080
   replicas:
     min: 2

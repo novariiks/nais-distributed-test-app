@@ -84,14 +84,30 @@ This uses the documented [Postgres resource](https://docs.novari.cloud.nais.io/p
 
 The manifests target team `flais` and the frontend ingress configured in `frontend/.nais/app.yaml`.
 
+### GitHub Actions
+
+Two independent workflows build the Docker images, publish them, and deploy each project to the `test` environment:
+
+- `.github/workflows/deploy-backend.yaml` runs for backend, Gradle, and backend workflow changes. It applies PostgreSQL, then the backend Application, waiting for each deployment.
+- `.github/workflows/deploy-frontend.yaml` runs for frontend and frontend workflow changes and deploys the frontend Application.
+
+Both run on pushes to `main` and can be started manually from the Actions tab on `main`. Deployments for each project run serially. Each Dockerfile compiles its application in a build stage; deployment workflows do not build the application separately. A failed image build stops deployment. Tests run independently in `.github/workflows/ci.yaml`. Each project publishes its own image using the `backend` or `frontend` image suffix, with separate Docker build caches, and deploys the exact image reference returned by the build action.
+
+Before the first run:
+
+1. Authorize `novariiks/nais-distributed-test-app` for team `flais` in Nais Console, including permission to publish images and deploy resources.
+2. Confirm the frontend ingress matches the `test` environment. The workflows set `NAIS_ENVIRONMENT: test` directly and need no repository environment variable. Deploy the backend first on initial setup so its dependencies and API are available when the frontend starts.
+
+The workflows use GitHub OIDC (`id-token: write`) with `nais/docker-build-push@v0` for the Novari image registry and `nais/setup@v1` for the CLI, following the [Novari deployment pipeline guide](https://docs.novari.cloud.nais.io/build/how-to/deploy-pipeline). No stored deployment or registry credentials are configured in this repository.
+
 ### Manual deployment
 
-Build and push both images to your permitted registry, then use the NAIS CLI with the intended environment:
+Build and push both images to your permitted registry, then use the NAIS CLI with the `test` environment:
 
 ```sh
-nais apply backend/.nais/postgres.yaml --environment YOUR_ENVIRONMENT --team flais --wait
-nais apply backend/.nais/app.yaml --environment YOUR_ENVIRONMENT --team flais --set spec.image=YOUR_BACKEND_IMAGE --wait
-nais apply frontend/.nais/app.yaml --environment YOUR_ENVIRONMENT --team flais --set spec.image=YOUR_FRONTEND_IMAGE --wait
+nais apply backend/.nais/postgres.yaml --environment test --team flais --wait
+nais apply backend/.nais/app.yaml --environment test --team flais --set spec.image=YOUR_BACKEND_IMAGE --wait
+nais apply frontend/.nais/app.yaml --environment test --team flais --set spec.image=YOUR_FRONTEND_IMAGE --wait
 ```
 
 Flyway applies schema migrations on startup, including removing the legacy outbox table. Existing messages are preserved. All backend replicas use the same database and independently deliver updates to their connected clients.
@@ -114,3 +130,5 @@ Flyway applies schema migrations on startup, including removing the legacy outbo
 | `scripts/` | Dependency-free manifest renderer |
 | `compose.yaml` | Local PostgreSQL, backend, and frontend |
 | `.github/workflows/ci.yaml` | Backend and frontend build/test checks |
+
+Deployment workflows live alongside CI in `.github/workflows/deploy-backend.yaml` and `.github/workflows/deploy-frontend.yaml`.
