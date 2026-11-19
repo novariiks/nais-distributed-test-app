@@ -28,4 +28,4 @@ spec:
   liveness:
     path: /healthz
   readiness:
-    path: /healthz
+    path: /readyz
