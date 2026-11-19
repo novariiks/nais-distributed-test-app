@@ -1,0 +1,72 @@
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.dockerignore'
+      - '.github/workflows/deploy-backend.yaml'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+env:
+  NAIS_ENVIRONMENT: test
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build and push image
+        uses: nais/docker-build-push@v0
+        id: image
+        with:
+          team: flais
+          tenant: novari
+          dockerfile: backend/Dockerfile
+          docker_context: .
+          image_suffix: backend
+          cache_from: type=gha,scope=backend
+          cache_to: type=gha,mode=max,scope=backend
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      IMAGE: ${{ needs.build.outputs.image }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: nais/setup@v1
+        with:
+          team: flais
+      - name: Apply PostgreSQL
+        run: nais apply backend/.nais/postgres.yaml --environment "$NAIS_ENVIRONMENT" --wait
+      - name: Deploy backend
+        run: >-
+          nais apply backend/.nais/app.yaml
+          --environment "$NAIS_ENVIRONMENT"
+          --set spec.image="$IMAGE"
+          --wait
