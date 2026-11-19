@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${READWRITE_PGJDBCURL}
+    username: ${READWRITE_PGUSER}
+    password: ""
+  flyway:
+    url: ${PGJDBCURL}
+    user: ${PGUSER}
+    password: ""
+  kafka:
+    properties:
+      security.protocol: SSL
+      ssl.keystore.type: PKCS12
+      ssl.keystore.location: ${KAFKA_KEYSTORE_PATH}
+      ssl.keystore.password: ${KAFKA_CREDSTORE_PASSWORD}
+      ssl.truststore.type: JKS
+      ssl.truststore.location: ${KAFKA_TRUSTSTORE_PATH}
+      ssl.truststore.password: ${KAFKA_CREDSTORE_PASSWORD}

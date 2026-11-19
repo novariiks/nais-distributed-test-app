@@ -1,0 +1,9 @@
+version: v1
+type: Postgres
+name: nais-chat
+spec:
+  majorVersion: "18"
+  resources:
+    cpu: 100m
+    memory: 256Mi
+    diskSize: 5Gi

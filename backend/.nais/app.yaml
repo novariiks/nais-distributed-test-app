@@ -1,0 +1,47 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: nais-chat-backend
+  namespace: flais
+  labels:
+    team: flais
+spec:
+  image: "{{image}}"
+  port: 8080
+  replicas:
+    min: 2
+    max: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 384Mi
+    limits:
+      memory: 768Mi
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: nais
+    - name: CHAT_TOPIC
+      value: "flais.chat-messages"
+  uses:
+    postgres:
+      - name: nais-chat
+        role: admin
+  kafka:
+    pool: novari-test
+  accessPolicy:
+    inbound:
+      rules:
+        - application: nais-chat-frontend
+  startup:
+    path: /actuator/health/liveness
+    initialDelay: 10
+    periodSeconds: 5
+    failureThreshold: 30
+  liveness:
+    path: /actuator/health/liveness
+  readiness:
+    path: /actuator/health/readiness
+  prometheus:
+    enabled: true
+    path: /actuator/prometheus
+  terminationGracePeriodSeconds: 30
