@@ -8,7 +8,7 @@ metadata:
 spec:
   port: 8080
   ingresses:
-    - nais-chat.test.novari.cloud.nais.io
+    - https://nais-chat.test.novari.cloud.nais.io
   replicas:
     min: 1
     max: 2
