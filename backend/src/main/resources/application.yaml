@@ -5,25 +5,6 @@ spring:
     url: ${DB_JDBC_URL:jdbc:postgresql://localhost:5432/chat}
     username: ${DB_USERNAME:chat}
     password: ${DB_PASSWORD:chat}
-  kafka:
-    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: all
-      properties:
-        enable.idempotence: true
-        max.block.ms: 5000
-        delivery.timeout.ms: 10000
-        request.timeout.ms: 5000
-    consumer:
-      # Every replica must receive all events to notify its own connected browsers.
-      group-id: chat-live-${HOSTNAME:${random.uuid}}
-      auto-offset-reset: latest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    listener:
-      ack-mode: record
 server:
   shutdown: graceful
   tomcat:
@@ -42,5 +23,4 @@ management:
         readiness:
           include: readinessState,db
 chat:
-  topic: ${CHAT_TOPIC:chat.messages}
   instance: ${HOSTNAME:local}

@@ -47,7 +47,7 @@ function App() {
     void fetch('/api/info', { signal: abort.signal })
       .then(response => { if (!response.ok) throw new Error(); return response.json(); })
       .then(info => setInstance(info.instance)).catch(() => {});
-    // Reconcile missed events after reconnects, deploys, or Kafka downtime.
+    // Reconcile missed events after reconnects or deploys.
     const timer = window.setInterval(() => { void refresh(); }, 10000);
     return () => { abort.abort(); events.close(); window.clearInterval(timer); };
   }, []);
@@ -85,14 +85,13 @@ function App() {
         <div><span className="stack-symbol">Kt</span><span>Kotlin <small>Spring Boot backend</small></span></div>
         <div><span className="stack-symbol">R</span><span>React <small>Your window into the chat</small></span></div>
         <div><span className="stack-symbol">P</span><span>PostgreSQL <small>Remembers the conversation</small></span></div>
-        <div><span className="stack-symbol">K</span><span>Kafka <small>Connects the replicas</small></span></div>
       </div>
       <div className="sidebar-footer">Built to explore NAIS.<br /><span>No sign-in. Just say hello.</span></div>
     </aside>
     <main>
       <header className="topbar"><div><span className="hash">#</span><strong>general</strong><span className="divider" /><span className="topic">The platform, in conversation</span></div><span className={`connection ${connected ? 'online' : ''}`} role="status"><i />{connected ? 'Live updates' : 'Reconnecting'}</span></header>
       <section className="conversation" aria-label="General chat">
-        <div className="welcome"><span className="eyebrow">SMALL APP. DISTRIBUTED BY DESIGN.</span><h1>Hello, platform.</h1><p>Drop a message. Open another tab. Watch it travel.</p><div className="journey"><span>React</span><b>→</b><span>Kotlin</span><b>→</b><span>PostgreSQL</span><b>→</b><span>Kafka</span><b>→</b><span>Everyone</span></div></div>
+        <div className="welcome"><span className="eyebrow">SMALL APP. DISTRIBUTED BY DESIGN.</span><h1>Hello, platform.</h1><p>Drop a message. Open another tab. Watch it travel.</p><div className="journey"><span>React</span><b>→</b><span>Kotlin</span><b>→</b><span>PostgreSQL</span><b>→</b><span>Everyone</span></div></div>
         <div className="conversation-divider"><span>The conversation starts here</span></div>
         <div className="messages" role="log" aria-live="polite" aria-label="Messages">
           {loading && <p className="empty">Loading the conversation…</p>}
@@ -113,7 +112,7 @@ function App() {
           <textarea id="message" value={body} onChange={event => setBody(event.target.value)} placeholder="Say something in #general…" maxLength={2000} rows={2} required disabled={sending} />
           <div className="composer-actions"><span>{body.length.toLocaleString()} / 2,000</span><button type="submit" disabled={sending || !author.trim() || !body.trim()}>{sending ? 'Sending…' : 'Send message'}</button></div>
         </form>
-        <div className="bottom-note"><span>History in PostgreSQL · Live delivery through Kafka</span><span className="backend-instance" title="Backend replica serving this browser">{instance}</span></div>
+        <div className="bottom-note"><span>Shared history · Live updates across replicas</span><span className="backend-instance" title="Backend replica serving this browser">{instance}</span></div>
       </footer>
     </main>
   </div>;

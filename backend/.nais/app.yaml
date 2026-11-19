@@ -20,14 +20,10 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: nais
-    - name: CHAT_TOPIC
-      value: "flais.chat-messages"
   uses:
     postgres:
       - name: nais-chat
         role: admin
-  kafka:
-    pool: novari-test
   accessPolicy:
     inbound:
       rules:

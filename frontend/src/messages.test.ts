@@ -6,7 +6,7 @@ const message = (id: string, createdAt = '2026-01-01T00:00:00Z'): Message => ({
 });
 
 describe('message reconciliation', () => {
-  it('deduplicates Kafka redelivery and overlapping history', () => {
+  it('deduplicates repeated events and overlapping history', () => {
     expect(mergeMessages([message('a')], [message('a'), message('b')])).toHaveLength(2);
   });
   it('sorts delayed events chronologically', () => {

@@ -6,7 +6,7 @@ export interface Message {
   instance: string;
 }
 
-// Kafka can redeliver an outbox event after a publisher crash.
+// Live events can overlap with history refreshes and reconnects.
 export function mergeMessages(current: Message[], incoming: Message[]): Message[] {
   const messages = new Map(current.map(message => [message.id, message]));
   incoming.forEach(message => messages.set(message.id, message));
