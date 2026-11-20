@@ -3,9 +3,9 @@ package cloud.nais.chat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.builder.SpringApplicationBuilder
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext
+import org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext
 import org.springframework.jdbc.core.JdbcTemplate
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
@@ -23,8 +23,8 @@ class ChatIntegrationTest {
         replica("replica-a").use { first ->
             replica("replica-b").use { second ->
                 val client = HttpClient.newHttpClient()
-                val firstUrl = "http://localhost:${first.webServer.port}"
-                val secondUrl = "http://localhost:${second.webServer.port}"
+                val firstUrl = "http://localhost:${requireNotNull(first.webServer).port}"
+                val secondUrl = "http://localhost:${requireNotNull(second.webServer).port}"
                 val streamA = client.send(request("$firstUrl/api/events"), BodyHandlers.ofInputStream()).body()
                 val streamB = client.send(request("$secondUrl/api/events"), BodyHandlers.ofInputStream()).body()
                 streamA.use { a -> streamB.use { b ->
@@ -80,6 +80,6 @@ class ChatIntegrationTest {
 
     companion object {
         @Container @JvmField
-        val postgres = PostgreSQLContainer<Nothing>(DockerImageName.parse("postgres:17-alpine"))
+        val postgres = PostgreSQLContainer(DockerImageName.parse("postgres:17-alpine"))
     }
 }
