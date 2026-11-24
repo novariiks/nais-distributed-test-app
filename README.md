@@ -112,6 +112,12 @@ nais apply frontend/.nais/app.yaml --environment test --team flais --set spec.im
 
 Flyway applies schema migrations on startup, including removing the legacy outbox table. Existing messages are preserved. All backend replicas use the same database and independently deliver updates to their connected clients.
 
+## Backend observability
+
+The backend enables OpenTelemetry Java auto-instrumentation in `backend/.nais/app.yaml`, following the [Novari observability guide](https://docs.novari.cloud.nais.io/observability/tutorials/getting-started/). NAIS injects and configures the agent at startup to collect HTTP and JDBC traces and JVM runtime metrics. The agent is enabled only when deployed to NAIS; local Compose and `bootRun` do not inject it. Prometheus metrics remain available at `/actuator/prometheus`.
+
+After deploying the backend, send messages or load history to generate traffic. Open the [Novari APM service inventory](https://grafana.novari.cloud.nais.io/a/nais-apm-app) and find `nais-chat-backend` to inspect request rates, errors, latency, and database dependencies. Data should appear within a few minutes. In [Grafana Explore](https://grafana.novari.cloud.nais.io/explore), select Tempo and search with `{resource.service.name="nais-chat-backend"}` to inspect traces.
+
 ## Demo ideas
 
 - Open two browser windows and send messages. Observe delivery across replicas.
