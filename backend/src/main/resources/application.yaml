@@ -1,6 +1,8 @@
 spring:
   application:
     name: nais-chat
+  main:
+    banner-mode: "off"
   datasource:
     url: ${DB_JDBC_URL:jdbc:postgresql://localhost:5432/chat}
     username: ${DB_USERNAME:chat}
@@ -22,5 +24,9 @@ management:
       group:
         readiness:
           include: readinessState,db
+logging:
+  structured:
+    format:
+      console: logstash
 chat:
   instance: ${HOSTNAME:local}

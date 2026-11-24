@@ -7,6 +7,9 @@ metadata:
     team: flais
 spec:
   port: 8080
+  frontend:
+    generatedConfig:
+      mountPath: /usr/share/nginx/html/js/nais.js
   ingresses:
     - https://nais-chat.test.novari.cloud.nais.io
   replicas:

@@ -118,6 +118,16 @@ The backend enables OpenTelemetry Java auto-instrumentation in `backend/.nais/ap
 
 After deploying the backend, send messages or load history to generate traffic. Open the [Novari APM service inventory](https://grafana.novari.cloud.nais.io/a/nais-apm-app) and find `nais-chat-backend` to inspect request rates, errors, latency, and database dependencies. Data should appear within a few minutes. In [Grafana Explore](https://grafana.novari.cloud.nais.io/explore), select Tempo and search with `{resource.service.name="nais-chat-backend"}` to inspect traces.
 
+Backend logs use Spring Boot's built-in Logstash JSON console format, including timestamps, levels, logger names, messages, and MDC fields. On NAIS, the OpenTelemetry agent adds `trace_id` and `span_id` to logs emitted within an active span, following the [trace/log correlation guide](https://docs.novari.cloud.nais.io/observability/tracing/how-to/correlate-traces-logs/). Startup and other logs outside a span have no trace context. In Grafana Explore, select Loki and query `{app="nais-chat-backend"} | json` to inspect the fields, or open a trace in APM and click **View logs** to see associated logs.
+
+## Frontend observability
+
+The frontend uses Grafana Faro for browser errors, page loads, Web Vitals, and browser-to-backend tracing, following the [Novari Faro guide](https://docs.novari.cloud.nais.io/observability/frontend/how-to/setup-faro/). A React error boundary reports rendering failures. Console capture is disabled, page URL query parameters and fragments are removed from telemetry metadata, and chat names and message bodies are not added to telemetry.
+
+NAIS generates `/usr/share/nginx/html/js/nais.js` with the collector URL and frontend application metadata. The browser imports `/js/nais.js` at runtime before rendering React; the configuration stays outside the Vite bundle and Nginx serves it with `Cache-Control: no-store`. The local fallback in `frontend/public/js/nais.js` disables telemetry for Vite and Compose. Failure to load or initialize telemetry still allows the chat to start.
+
+After deployment, open the chat and send a message. Check the browser Network panel for collector requests and a `traceparent` header on `/api/messages` requests. These same-origin requests pass through Nginx to the instrumented backend. In [Novari APM](https://grafana.novari.cloud.nais.io/a/nais-apm-app), find `nais-chat-frontend` and open the **Frontend** tab; use Tempo to inspect linked browser and backend spans.
+
 ## Demo ideas
 
 - Open two browser windows and send messages. Observe delivery across replicas.
