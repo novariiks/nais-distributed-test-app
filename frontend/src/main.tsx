@@ -2,7 +2,8 @@ import { StrictMode, useEffect, useRef, useState, type FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FaroErrorBoundary } from '@grafana/faro-react';
 import { mergeMessages, type Message } from './messages';
-import { initializeTelemetry, type FrontendConfig } from './telemetry';
+import { initializeTelemetry } from './telemetry';
+import nais from './nais.js';
 import './style.css';
 
 function App() {
@@ -120,13 +121,10 @@ function App() {
   </div>;
 }
 
-async function start() {
+function start() {
   let telemetryEnabled = false;
   try {
-    // Keep this as a runtime import: NAIS mounts the configuration after the build.
-    const configPath = '/js/nais.js';
-    const { default: config } = await import(/* @vite-ignore */ configPath) as { default: FrontendConfig };
-    telemetryEnabled = initializeTelemetry(config);
+    telemetryEnabled = initializeTelemetry(nais);
   } catch {
     console.warn('Frontend telemetry could not be initialized.');
   }
@@ -143,4 +141,4 @@ async function start() {
   );
 }
 
-void start();
+start();

@@ -9,7 +9,7 @@ spec:
   port: 8080
   frontend:
     generatedConfig:
-      mountPath: /usr/share/nginx/html/js/nais.js
+      mountPath: /usr/share/nginx/html/assets/nais.js
   ingresses:
     - https://nais-chat.test.novari.cloud.nais.io
   replicas:
